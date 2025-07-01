@@ -9,13 +9,35 @@ function getSimilarSubmissions(storyLink, metadata) {
       "https://hn.algolia.com/api/v1/search_by_date?tags=story&restrictSearchableAttributes=url&query=";
     const safeStoryLink = encodeURI(storyLink);
 
-    const results = [];
-    const rawResults = await fetch(API_URL + safeStoryLink)
+    let results = [];
+    let rawResults = await fetch(API_URL + safeStoryLink)
       .then((res) => res.json())
       .then((obj) => obj.hits);
 
     if (!rawResults) {
       return resolve(results);
+    }
+
+    let foundByTitle = false;
+    if (!results.length) {
+      let innerA = document.querySelector('.titleline a').innerHTML;
+      innerA = innerA.replaceAll(/\(.*\)/g, '');
+      if (innerA.length > 0) {
+        const safeStoryLink = encodeURI(innerA.trim());
+
+        results = [];
+        rawResults = await fetch(API_URL + safeStoryLink)
+          .then((res) => res.json())
+          .then((obj) => obj.hits);
+
+        if (!rawResults) {
+          return resolve(results);
+        }
+
+        if (results.length) {
+          foundByTitle = true;
+        }
+      }
     }
 
     for (const result of rawResults) {
@@ -24,12 +46,15 @@ function getSimilarSubmissions(storyLink, metadata) {
         continue;
       }
 
-      if (
-        !result.url ||
-        !compareUrls(result.url.split("://").pop(), storyLink)
-      ) {
+      if (!result.url) {
         continue;
       }
+
+      // if (
+      //   !compareUrls(result.url.split("://").pop(), storyLink)
+      // ) {
+      //   continue;
+      // }
 
       if (
         !metadata.options.showDiscussionsWithNoComments &&
@@ -74,7 +99,7 @@ async function init(metadata) {
   const discussionRow = document.createElement("tr");
   discussionRow.innerHTML = `
 		<td class='__rhn__discussions-row'>
-			<p>\*Discussions on similar submissions:\*</p>
+			<p>Discussions on similar submissions:</p>
 			<ol></ol>
 		</td>
 	`;
