@@ -13,7 +13,7 @@ export function createOptionsBar(position) {
   if (position === "top") {
     optionsBar.classList.add("__rhn__options-bar-top");
     const mainTableBody = document.querySelector("table#hnmain > tbody");
-    const pageSpaceRow = document.querySelector("#pagespace");
+    const pageSpaceRow = mainTableBody.querySelector("tr:nth-child(2)");
     mainTableBody.insertBefore(optionsBar, pageSpaceRow.nextElementSibling);
   } else {
     optionsBar.classList.add("__rhn__options-bar-bottom");
@@ -58,7 +58,7 @@ export function getTopLevelComments() {
 }
 
 export function getGroupedStories() {
-  const itemList = document.querySelector("#pagespace + div + tr table");
+  const itemList = document.querySelector("table#hnmain > tbody > tr:nth-child(2) + div + tr table");
   return getGroupedStoriesItemList(itemList);
 }
 
